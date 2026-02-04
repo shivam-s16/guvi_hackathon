@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+hack/
+venv/
+env/
+.venv/
+
+# Environment variables (NEVER commit real secrets!)
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+deployment_check_log.txt
+check_results.txt
+deployment_results.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test outputs
+demo_output.txt
+
+# Distribution
+dist/
+build/
+*.egg-info/
