@@ -330,23 +330,17 @@ async def process_message(
         behavior_metrics = behavior_engine.get_metrics()
         
         # Build response
+        # Build response (Strict match to specs)
         response = HoneypotResponse(
             status="success",
             scamDetected=is_scam,
-            scamConfidence=confidence,
             agentResponse=agent_response,
             engagementMetrics=EngagementMetrics(
                 engagementDurationSeconds=engagement_duration,
                 totalMessagesExchanged=message_count
             ),
             extractedIntelligence=final_session.extracted_intelligence,
-            behaviorMetrics=BehaviorMetricsResponse(
-                intentConfidence=behavior_metrics.get("confidence", 0.0),
-                escalationRate=behavior_metrics.get("escalation_rate", 0),
-                aggressionSlope=behavior_metrics.get("aggression_slope", 0.0)
-            ),
-            agentNotes=agent_notes,
-            sessionActive=not final_session.is_completed
+            agentNotes=agent_notes
         )
         
         return response

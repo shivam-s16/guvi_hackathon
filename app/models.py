@@ -81,16 +81,14 @@ class BehaviorMetricsResponse(BaseModel):
 
 
 class HoneypotResponse(BaseModel):
-    """API response model - detailed version."""
+    """API response model - strict format."""
     status: str = "success"
     scamDetected: bool = False
-    scamConfidence: float = 0.0  # 0-1 confidence score
-    agentResponse: Optional[str] = None
+    agentResponse: Optional[str] = None  # Kept as it is essential for the bot
     engagementMetrics: EngagementMetrics = Field(default_factory=EngagementMetrics)
     extractedIntelligence: ExtractedIntelligence = Field(default_factory=ExtractedIntelligence)
-    behaviorMetrics: BehaviorMetricsResponse = Field(default_factory=BehaviorMetricsResponse)
     agentNotes: str = ""
-    sessionActive: bool = True
+    # Removed: scamConfidence, behaviorMetrics, sessionActive to match specr 'nothing extra' request
 
 
 
