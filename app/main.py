@@ -131,8 +131,9 @@ async def root():
 
 
 @app.get("/health")
+@app.head("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint. Supports both GET and HEAD for uptime monitoring."""
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
