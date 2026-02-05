@@ -611,43 +611,8 @@ Current message context:
         
         return conversation_text
     
-    async def _call_gemini(self, system_prompt: str, conversation: str) -> Optional[str]:
-        """Call Google Gemini API (FREE tier)."""
-        api_key = self.settings.gemini_api_key
-        if not api_key:
-            return None
-        
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
-            
-            payload = {
-                "contents": [{
-                    "parts": [{
-                        "text": f"{system_prompt}\n\nConversation:\n{conversation}"
-                    }]
-                }],
-                "generationConfig": {
-                    "temperature": 0.8,
-                    "maxOutputTokens": 150
-                }
-            }
-            
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(url, json=payload)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    if "candidates" in data and len(data["candidates"]) > 0:
-                        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-                else:
-                    print(f"Gemini API error: {response.status_code} - {response.text}")
-        except Exception as e:
-            print(f"Gemini API error: {e}")
-        
-        return None
-    
     async def _call_groq(self, system_prompt: str, conversation: str) -> Optional[str]:
-        """Call Groq API (FREE tier with llama/mixtral models)."""
+        """Call Groq API (FREE tier with llama models)."""
         api_key = self.settings.groq_api_key
         if not api_key:
             return None
@@ -680,41 +645,6 @@ Current message context:
                     print(f"Groq API error: {response.status_code} - {response.text}")
         except Exception as e:
             print(f"Groq API error: {e}")
-        
-        return None
-    
-    async def _call_cohere(self, system_prompt: str, conversation: str) -> Optional[str]:
-        """Call Cohere API (FREE tier)."""
-        api_key = self.settings.cohere_api_key
-        if not api_key:
-            return None
-        
-        try:
-            url = "https://api.cohere.ai/v1/chat"
-            
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "model": "command-r",  # Free model
-                "message": conversation,
-                "preamble": system_prompt,
-                "temperature": 0.8,
-                "max_tokens": 150
-            }
-            
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(url, json=payload, headers=headers)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    return data["text"].strip()
-                else:
-                    print(f"Cohere API error: {response.status_code} - {response.text}")
-        except Exception as e:
-            print(f"Cohere API error: {e}")
         
         return None
     
@@ -756,21 +686,11 @@ Current message context:
         provider_used = "fallback"
         notes = []
         
-        # Try AI providers in order of preference (all FREE)
-        if self.settings.ai_provider == "gemini" or not response:
-            response = await self._call_gemini(system_prompt, conversation)
-            if response:
-                provider_used = "gemini"
-        
-        if not response and self.settings.groq_api_key:
+        # Use Groq as the primary (and only) AI provider
+        if self.settings.groq_api_key:
             response = await self._call_groq(system_prompt, conversation)
             if response:
                 provider_used = "groq"
-        
-        if not response and self.settings.cohere_api_key:
-            response = await self._call_cohere(system_prompt, conversation)
-            if response:
-                provider_used = "cohere"
         
         # Fallback to template-based responses
         if response is None or response == "":
