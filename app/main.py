@@ -21,7 +21,8 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings, Settings
 from app.models import (
     HoneypotRequest, HoneypotResponse, ErrorResponse, SimpleResponse,
-    EngagementMetrics, ExtractedIntelligence, ConversationMessage, BehaviorMetricsResponse
+    EngagementMetrics, ExtractedIntelligence, ExtractedIntelligenceInternal, 
+    ConversationMessage, BehaviorMetricsResponse
 )
 from app.services.detector import ScamDetector
 from app.services.behavior_engine import get_behavior_engine
@@ -329,17 +330,18 @@ async def process_message(
         )
         behavior_metrics = behavior_engine.get_metrics()
         
-        # Build response
-        # Build response (Strict match to specs)
+        # Build response (Strict match to specs - EXACT format)
+        # Convert internal intelligence to API format (only bankAccounts, upiIds, phishingLinks)
+        api_intelligence = final_session.extracted_intelligence.to_api_format()
+        
         response = HoneypotResponse(
             status="success",
             scamDetected=is_scam,
-            agentResponse=agent_response,
             engagementMetrics=EngagementMetrics(
                 engagementDurationSeconds=engagement_duration,
                 totalMessagesExchanged=message_count
             ),
-            extractedIntelligence=final_session.extracted_intelligence,
+            extractedIntelligence=api_intelligence,
             agentNotes=agent_notes
         )
         

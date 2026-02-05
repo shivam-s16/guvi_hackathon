@@ -65,13 +65,32 @@ class EngagementMetrics(BaseModel):
 
 
 class ExtractedIntelligence(BaseModel):
-    """Intelligence extracted from the conversation."""
+    """Intelligence extracted from the conversation - STRICT FORMAT per spec."""
+    bankAccounts: List[str] = Field(default_factory=list)
+    upiIds: List[str] = Field(default_factory=list)
+    phishingLinks: List[str] = Field(default_factory=list)
+
+
+class ExtractedIntelligenceInternal(BaseModel):
+    """
+    Extended intelligence model for internal use.
+    Contains all extracted data but only the spec fields are returned in API response.
+    """
     bankAccounts: List[str] = Field(default_factory=list)
     upiIds: List[str] = Field(default_factory=list)
     phishingLinks: List[str] = Field(default_factory=list)
     phoneNumbers: List[str] = Field(default_factory=list)
     suspiciousKeywords: List[str] = Field(default_factory=list)
     emailAddresses: List[str] = Field(default_factory=list)
+    
+    def to_api_format(self) -> ExtractedIntelligence:
+        """Convert to strict API response format."""
+        return ExtractedIntelligence(
+            bankAccounts=self.bankAccounts,
+            upiIds=self.upiIds,
+            phishingLinks=self.phishingLinks
+        )
+
 
 class BehaviorMetricsResponse(BaseModel):
     """Behavioral analysis metrics."""
@@ -81,14 +100,30 @@ class BehaviorMetricsResponse(BaseModel):
 
 
 class HoneypotResponse(BaseModel):
-    """API response model - strict format."""
+    """
+    API response model - STRICT FORMAT matching exact specification.
+    
+    Expected Output Format:
+    {
+        "status": "success",
+        "scamDetected": true,
+        "engagementMetrics": {
+            "engagementDurationSeconds": 420,
+            "totalMessagesExchanged": 18
+        },
+        "extractedIntelligence": {
+            "bankAccounts": ["XXXX-XXXX-XXXX"],
+            "upiIds": ["scammer@upi"],
+            "phishingLinks": ["http://malicious-link.example"]
+        },
+        "agentNotes": "Scammer used urgency tactics and payment redirection"
+    }
+    """
     status: str = "success"
     scamDetected: bool = False
-    agentResponse: Optional[str] = None  # Kept as it is essential for the bot
     engagementMetrics: EngagementMetrics = Field(default_factory=EngagementMetrics)
     extractedIntelligence: ExtractedIntelligence = Field(default_factory=ExtractedIntelligence)
     agentNotes: str = ""
-    # Removed: scamConfidence, behaviorMetrics, sessionActive to match specr 'nothing extra' request
 
 
 
@@ -122,7 +157,7 @@ class SessionData(BaseModel):
     scam_confidence: float = 0.0
     engagement_start: Optional[datetime] = None
     messages: List[Dict[str, Any]] = Field(default_factory=list)
-    extracted_intelligence: ExtractedIntelligence = Field(default_factory=ExtractedIntelligence)
+    extracted_intelligence: ExtractedIntelligenceInternal = Field(default_factory=ExtractedIntelligenceInternal)
     agent_notes: List[str] = Field(default_factory=list)
     persona: Dict[str, Any] = Field(default_factory=dict)
     is_completed: bool = False

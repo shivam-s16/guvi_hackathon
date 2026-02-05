@@ -5,7 +5,7 @@ Extracts actionable information from scam conversations.
 
 import re
 from typing import List, Dict, Set
-from app.models import ExtractedIntelligence, ConversationMessage, Message
+from app.models import ExtractedIntelligenceInternal, ConversationMessage, Message
 
 
 class IntelligenceExtractor:
@@ -142,9 +142,9 @@ class IntelligenceExtractor:
         
         return found_keywords
     
-    def extract_from_message(self, text: str) -> ExtractedIntelligence:
+    def extract_from_message(self, text: str) -> ExtractedIntelligenceInternal:
         """Extract intelligence from a single message."""
-        intelligence = ExtractedIntelligence()
+        intelligence = ExtractedIntelligenceInternal()
         
         # Extract bank accounts
         bank_matches = self._extract_pattern_matches(
@@ -196,12 +196,12 @@ class IntelligenceExtractor:
         self, 
         current_message: Message,
         history: List[ConversationMessage]
-    ) -> ExtractedIntelligence:
+    ) -> ExtractedIntelligenceInternal:
         """
         Extract intelligence from entire conversation.
         Combines intelligence from all messages.
         """
-        combined = ExtractedIntelligence()
+        combined = ExtractedIntelligenceInternal()
         
         # Process history
         for msg in history:
@@ -224,8 +224,8 @@ class IntelligenceExtractor:
     
     def _merge_intelligence(
         self, 
-        target: ExtractedIntelligence, 
-        source: ExtractedIntelligence
+        target: ExtractedIntelligenceInternal, 
+        source: ExtractedIntelligenceInternal
     ) -> None:
         """Merge source intelligence into target."""
         target.bankAccounts.extend(source.bankAccounts)
@@ -235,7 +235,7 @@ class IntelligenceExtractor:
         target.emailAddresses.extend(source.emailAddresses)
         target.suspiciousKeywords.extend(source.suspiciousKeywords)
     
-    def get_intelligence_summary(self, intel: ExtractedIntelligence) -> str:
+    def get_intelligence_summary(self, intel: ExtractedIntelligenceInternal) -> str:
         """Generate a human-readable summary of extracted intelligence."""
         parts = []
         

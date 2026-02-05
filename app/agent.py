@@ -9,7 +9,7 @@ import os
 import httpx
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
-from app.models import Message, ConversationMessage, ExtractedIntelligence
+from app.models import Message, ConversationMessage
 from app.config import get_settings
 from app.services.behavior_engine import get_behavior_engine
 

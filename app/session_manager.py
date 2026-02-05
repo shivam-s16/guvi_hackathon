@@ -8,7 +8,7 @@ from typing import Dict, Optional, List
 import json
 import asyncio
 from app.models import (
-    SessionData, ExtractedIntelligence, 
+    SessionData, ExtractedIntelligenceInternal, 
     ConversationMessage, Message
 )
 from app.config import get_settings
@@ -49,7 +49,7 @@ class SessionManager:
                 session_id=session_id,
                 engagement_start=datetime.utcnow(),
                 messages=[],
-                extracted_intelligence=ExtractedIntelligence(),
+                extracted_intelligence=ExtractedIntelligenceInternal(),
                 agent_notes=[]
             )
             self.sessions[session_id] = session
@@ -68,7 +68,7 @@ class SessionManager:
         scam_detected: bool = None,
         scam_confidence: float = None,
         new_message: Dict = None,
-        intelligence: ExtractedIntelligence = None,
+        intelligence: ExtractedIntelligenceInternal = None,
         agent_note: str = None,
         persona: Dict = None,
         is_completed: bool = None
@@ -109,11 +109,11 @@ class SessionManager:
     
     def _merge_intelligence(
         self,
-        existing: ExtractedIntelligence,
-        new: ExtractedIntelligence
-    ) -> ExtractedIntelligence:
+        existing: ExtractedIntelligenceInternal,
+        new: ExtractedIntelligenceInternal
+    ) -> ExtractedIntelligenceInternal:
         """Merge new intelligence into existing."""
-        merged = ExtractedIntelligence(
+        merged = ExtractedIntelligenceInternal(
             bankAccounts=list(set(existing.bankAccounts + new.bankAccounts)),
             upiIds=list(set(existing.upiIds + new.upiIds)),
             phishingLinks=list(set(existing.phishingLinks + new.phishingLinks)),
